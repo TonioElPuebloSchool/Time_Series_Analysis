@@ -7,169 +7,170 @@
 
 -----
 ### [*Moodle course*](https://moodle.epf.fr/course/view.php?id=9512)
-### [*Github depository*](https://github.com/EPF-MDE/MMMDE4IN19-22-antoine-courbi)
+### [*Github depository*](https://github.com/TonioElPuebloSchool/Time_Series_Analysis)
 -----
 
-This **README** is meant to explain **how to run** the application and what **features** are implemented.
+This **README** explains the **architecture** of the **notebook**, the different steps of the analysis and the results obtained.
 
 # **Requirements**
 The following requirements are needed to run the application:
 ```bash
-npm install
-npm install express-basic-auth
-npm install method-override
-npm install method-override body-parser
+seasonal_decompose
+adfuller
+ExponentialSmoothing
+SimpleExpSmoothing
+ARIMA
 ```
-Now `npm run dev` can be used **in the epfbook folder** to run the application properly, after which the application can be accessed at http://localhost:3000/.
-The auhtentification is done with the following credentials:
-```bash
-username,password
-eric-burel,1234admin
-acourbi,newpassword
-admin,admin
-```
-There is no other kind of auhtentification, so the user can access the application with any of the credentials above.
 
 # **Overview**
 
-The application is a simple `web application` that allows the user to see a **list of students** and their details. The user can also `update` the details of a student, `add` a student or `delete` a student. The user can also access the `data` of the students by `downloading` a csv file. There is also a `search bar` that allows the user to search for a student by name, and a `chart` page that displays a chart on the *covid-19-students-delhi.csv* file.
+As explained in the notebook, the original dataset comes from a set of three datasets from [kaggle](https://www.kaggle.com/datasets/shenba/time-series-datasets/data). The one selected is named Electric_Production and contains yearly electrical production in IPG2211A2N.
+
+The dataset starts on january 1985 and end in january 2018. The test set is chosen to be the last entire year of the dataset, from january 107 to december 2017.
 
 # **Architecture**
 
-The application is composed of the following files in `epfbook` folder:
-- app.js
-- package.json
-- package-lock.json
-- students.csv
-- users.csv
-- users_uncrypted.csv
-- **views folder**
-    - home.html
-    - create-student.ejs
-    - search_results.ejs
-    - student_details.ejs
-    - student_unknown.ejs
-    - student_unknown.ejs
-    - students-data.ejs
-    - students.ejs
-- **public folder**
-    - covid-19-students-delhi.csv
-    - style.css
-    - style_chart.css
-    - students.js
-
-# **Features**
-# Exercise 0: Consume an existing API
-
-If we want to retrieve the character whose id is 5, we can follow the documentation where we can see the following :
+The project architecture is based on [this towarddatascience article](https://towardsdatascience.com/time-series-in-python-exponential-smoothing-and-arima-processes-2c67f2a52788).
+This article enlight the following points :
 ```bash
-You can get a single character by adding the id as a parameter: /character/
-GET https://rickandmortyapi.com/api/character/2 
-```
-Hence when following the url for character with id=5 we get :
-```bash
-{"id":5,"name":"Jerry Smith","status":"Alive","species":"Human", ...
+- Decomposition of a time series
+- Checking Stationarity
+- Choosing a model
+- Plotting predictions
 ```
 
-# Exercise 1: A page per student
+Based on this, the notebook 
 
-In order to have a different page for **each student**, we need to add a route for each student. We can do this by adding the following code in the app.js file:
-```bash
-app.get('/students/:id', (req, res)
+- Import Libraries/Data
+- **Manual** Decomposition
+- **TSA** Decomposition
+- Check **Stationarity**
+  - Convert to stationary
+- **Split** the data
+- **Prediction**
+  - Exponential Smoothing
+    - `Simple Exponential Smoothing`
+    - `Triple Exponential Smoothing (HWSE)`
+  - ARMA/ARIMA
+    - `ARMA`
+    - `ARIMA`
+- Summaries
+
+# **Results**
+# Simple Exponential Smoothing
+
 ```
-We also need to create a `student_details.ejs` file in the `views` folder. This file will be used to display the details of a student.
-
-If a student is not found, we can redirect the user to a `student_unknown.ejs` file. This file will display a message saying that the student is not found as follows:
-```html
-<h1>Student Not Found</h1>
-      <p>The requested student does not exist.</p>
-```
-
-
-# Exercise 2: Update a student
-
-Still in the `student_details.ejs` file, we can add a form to update the student. This form will be sent to the server with a **POST request**. The server will then update the student in the `students.csv` file. The following code is used to update the student:
-```bash
-fs.createReadStream('students.csv')
-    .pipe(csv.parse({ headers: true }))
-    .on('data', (data) => {
-      students.push(data);
-    })
-    .on('end', () => {
-      students[studentId] = updatedStudent;
-
-      // Write the updated students array back to the CSV file
-      const ws = fs.createWriteStream('students.csv');
-      csv.write(students, { headers: true })
-        .pipe(ws)
-        .on('finish', () => {
-          console.log(`Updated student with ID: ${studentId}`);
-          res.redirect(`/students/${studentId}`);
-        });
-    });
-```
-As you can see after the update is done, we redirect the user to the `student_details` page, which will refresh the page and display the updated student.
-
-# Exercice 3: Delete a student
-
-In order to **delete** a student, we need to add a button in the `student_details.ejs` file. This button will send a **POST request** to the server. The server will then **delete** the student from the `students.csv` file. After the deletion is completed, the user is redirected to the students page. 
-
-To make sure no student is deleted by mistake, we can add a **confirmation message** before the deletion is done. This is done by adding the following code in the `student_details.ejs` file:
-```bash
-function confirmDelete() {
-          if (confirm("Are you sure you want to delete this student?")) {
-            window.location.href = "/students/<%= studentId %>/delete";
-          }
-        }
-```
-This function is called when the user clicks on the delete button. If the user confirms the deletion, the function redirects the user to the delete route. 
-
-# Exercice 4: Search for a student
-
-In the `students.ejs` file, we can add a **search bar**. If the user types a name in the **search bar**, the students page will be refreshed and only the students whose name contains the string typed by the user will be displayed. It also works for the student's school. 
-
-To do so we need to create a new page for the results of the search, displaying the students found as **clickable links**, redirecting towards the `student_details` page. 
-
-# Exercice 5: Download the list of students
-
-We can also add a route to **download** the list of students in a csv file. This is done by adding the following code in the app.js file, in the `app.get('/students/:id', (req, res)` route:
-```bash
-if (req.params.id === 'download') {
-    // adding the route to download the data
-    console.log("downloading file");
-    res.download('./students.csv');
-    return;
-  }
+<class 'statsmodels.iolib.summary.Summary'>
+"""
+                       SimpleExpSmoothing Model Results                       
+==============================================================================
+Dep. Variable:             production   No. Observations:                  395
+Model:             SimpleExpSmoothing   SSE                          23303.764
+Optimized:                       True   AIC                           1614.606
+Trend:                           None   BIC                           1622.564
+Seasonal:                        None   AICC                          1614.709
+Seasonal Periods:                None   Date:                 Tue, 26 Dec 2023
+Box-Cox:                        False   Time:                         15:15:19
+Box-Cox Coeff.:                  None                                         
+==============================================================================
+                       coeff                 code              optimized      
+------------------------------------------------------------------------------
+smoothing_level            1.0000000                alpha                 True
+initial_level              72.504780                  l.0                 True
+------------------------------------------------------------------------------
+"""
 ```
 
-# Exercice 6: Adding a chart page
+# Triple Exponential Smoothing
 
-We can use the **chart** page created in the previous TP. We just need to add a route to access this page. This is done by adding the following code in the `app.js` file:
-```bash
-app.get("/students/data", (req, res) => {
-  res.render("students-data");
-});
 ```
-
-# Exercice 7: Adding a menu
-To finalize the application, we can add a **menu** to navigate between the different pages. We use the same menu for all of the pages, added at the top of the page as follows:
-```html
-<nav>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/students/data">Chart</a></li>
-        <li><a href="/students">Students</a></li>
-        <li><a href="/students/create">Create a Student</a></li>
-        <li><a href="/students/download">Download CSV</a></li>
-    </ul>
-</nav>
+<class 'statsmodels.iolib.summary.Summary'>
+"""
+                       ExponentialSmoothing Model Results                       
+================================================================================
+Dep. Variable:               production   No. Observations:                  396
+Model:             ExponentialSmoothing   SSE                          23492.230
+Optimized:                         True   AIC                           1630.872
+Trend:                         Additive   BIC                           1658.742
+Seasonal:                      Additive   AICC                          1631.339
+Seasonal Periods:                     3   Date:                 Tue, 26 Dec 2023
+Box-Cox:                           True   Time:                         15:16:39
+Box-Cox Coeff.:                 1.14774                                         
+=================================================================================
+                          coeff                 code              optimized      
+---------------------------------------------------------------------------------
+smoothing_level               0.9944877                alpha                 True
+smoothing_trend               0.0021932                 beta                 True
+smoothing_seasonal            0.0054628                gamma                 True
+initial_level                 101.65438                  l.0                 True
+initial_trend                 0.2009154                  b.0                 True
+initial_seasons.0             0.5083177                  s.0                 True
+initial_seasons.1            -1.2684409                  s.1                 True
+initial_seasons.2             1.0539652                  s.2                 True
+---------------------------------------------------------------------------------
+"""
 ```
-# Exercice 8: Work on the design
-
-We can work on the design of the application by modifying the `style.css` file. We can add a background color, change the color of the links, change the font, etc. We use a differente css file for the chart page, `style_chart.css`, to change the design of the chart, because we don't want the same design for the chart and the rest of the application.
-
-Thank you for reading this README. I hope you enjoyed it. If you have any remarks or questions, feel free to contact me on [LinkedIn](https://www.linkedin.com/in/antoine-courbi/).
+# ARMA
+```
+<class 'statsmodels.iolib.summary.Summary'>
+"""
+                               SARIMAX Results                                
+==============================================================================
+Dep. Variable:             production   No. Observations:                  384
+Model:                 ARIMA(3, 0, 4)   Log Likelihood                -994.798
+Date:                Tue, 26 Dec 2023   AIC                           2007.597
+Time:                        15:16:50   BIC                           2043.153
+Sample:                    01-01-1985   HQIC                          2021.700
+                         - 12-01-2016                                         
+Covariance Type:                  opg                                         
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const         88.3194    171.205      0.516      0.606    -247.237     423.876
+ar.L1          1.9942      0.007    299.304      0.000       1.981       2.007
+ar.L2         -1.9836      0.011   -181.611      0.000      -2.005      -1.962
+ar.L3          0.9892      0.006    164.874      0.000       0.977       1.001
+ma.L1         -1.1876      0.050    -23.914      0.000      -1.285      -1.090
+ma.L2          0.7362      0.079      9.261      0.000       0.580       0.892
+ma.L3          0.0562      0.080      0.706      0.480      -0.100       0.212
+ma.L4         -0.3904      0.057     -6.875      0.000      -0.502      -0.279
+sigma2         9.9079      0.677     14.644      0.000       8.582      11.234
+===================================================================================
+Ljung-Box (L1) (Q):                   1.33   Jarque-Bera (JB):                22.40
+...
+===================================================================================
+```
+# ARIMA
+```
+<class 'statsmodels.iolib.summary.Summary'>
+"""
+                               SARIMAX Results                                
+==============================================================================
+Dep. Variable:             production   No. Observations:                  384
+Model:                 ARIMA(3, 0, 4)   Log Likelihood                -994.798
+Date:                Tue, 26 Dec 2023   AIC                           2007.597
+Time:                        15:16:50   BIC                           2043.153
+Sample:                    01-01-1985   HQIC                          2021.700
+                         - 12-01-2016                                         
+Covariance Type:                  opg                                         
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const         88.3194    171.205      0.516      0.606    -247.237     423.876
+ar.L1          1.9942      0.007    299.304      0.000       1.981       2.007
+ar.L2         -1.9836      0.011   -181.611      0.000      -2.005      -1.962
+ar.L3          0.9892      0.006    164.874      0.000       0.977       1.001
+ma.L1         -1.1876      0.050    -23.914      0.000      -1.285      -1.090
+ma.L2          0.7362      0.079      9.261      0.000       0.580       0.892
+ma.L3          0.0562      0.080      0.706      0.480      -0.100       0.212
+ma.L4         -0.3904      0.057     -6.875      0.000      -0.502      -0.279
+sigma2         9.9079      0.677     14.644      0.000       8.582      11.234
+===================================================================================
+Ljung-Box (L1) (Q):                   1.33   Jarque-Bera (JB):                22.40
+...
+===================================================================================
+```
 
 <p align="center">&mdash; ⭐️ &mdash;</p>
-<p align="center"><i>This README was created during the Web Programming course</i></p>
-<p align="center"><i>Created by Antoine Courbi</i></p>
+<p align="center"><i>This README was created during the Time Series Analysis course</i></p>
+<p align="center"><i>Created by Antoine Courbi and Thibault Gillard</i></p>
