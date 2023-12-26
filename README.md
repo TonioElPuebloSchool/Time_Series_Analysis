@@ -10,10 +10,10 @@
 ### [*Github depository*](https://github.com/TonioElPuebloSchool/Time_Series_Analysis)
 -----
 
-This **README** explains the **architecture** of the **notebook**, the different steps of the analysis and the results obtained.
+This **README** explains the **architecture** of the **notebook**, the different steps and choices of the **analysis** and the **results** obtained.
 
 # **Requirements**
-The following requirements are needed to run the application:
+The following `required packages` are needed :
 ```bash
 seasonal_decompose
 adfuller
@@ -24,9 +24,15 @@ ARIMA
 
 # **Overview**
 
-As explained in the notebook, the original dataset comes from a set of three datasets from [kaggle](https://www.kaggle.com/datasets/shenba/time-series-datasets/data). The one selected is named Electric_Production and contains yearly electrical production in IPG2211A2N.
+As explained in the **notebook**, the original **dataset** comes from a set of three datasets from [kaggle](https://www.kaggle.com/datasets/shenba/time-series-datasets/data). The one selected is named **Electric_Production** and contains `yearly electrical production` in **IPG2211A2N**.
 
-The dataset starts on january 1985 and end in january 2018. The test set is chosen to be the last entire year of the dataset, from january 107 to december 2017.
+Here is an overview of the data :
+
+<p align="center">
+  <img src="Description.png" width="800" />
+</p>
+
+The dataset starts on **january 1985** and end in **january 2018**. The `test set` is chosen to be the last entire year of the dataset, from **january 107** to **december 2017**.
 
 # **Architecture**
 
@@ -39,7 +45,7 @@ This article enlight the following points :
 - Plotting predictions
 ```
 
-Based on this, the notebook 
+Based on this, here is the structure of the notebook :
 
 - Import Libraries/Data
 - **Manual** Decomposition
@@ -57,7 +63,7 @@ Based on this, the notebook
 - Summaries
 
 # **Results**
-# Simple Exponential Smoothing
+## Simple Exponential Smoothing
 
 ```
 <class 'statsmodels.iolib.summary.Summary'>
@@ -81,7 +87,7 @@ initial_level              72.504780                  l.0                 True
 """
 ```
 
-# Triple Exponential Smoothing
+## Triple Exponential Smoothing
 
 ```
 <class 'statsmodels.iolib.summary.Summary'>
@@ -110,7 +116,7 @@ initial_seasons.2             1.0539652                  s.2                 Tru
 ---------------------------------------------------------------------------------
 """
 ```
-# ARMA
+## ARMA
 ```
 <class 'statsmodels.iolib.summary.Summary'>
 """
@@ -140,7 +146,7 @@ Ljung-Box (L1) (Q):                   1.33   Jarque-Bera (JB):                22
 ...
 ===================================================================================
 ```
-# ARIMA
+## ARIMA
 ```
 <class 'statsmodels.iolib.summary.Summary'>
 """
@@ -170,6 +176,48 @@ Ljung-Box (L1) (Q):                   1.33   Jarque-Bera (JB):                22
 ...
 ===================================================================================
 ```
+
+> ***Metric***: The `AIC` and `BIC` are measures of the goodness of fit of an estimated statistical model and can be used for **model selection**. **Lower** values for both `AIC` and `BIC` are **better**.
+
+## Simple Exponential Smoothing
+
+```markdown
+AIC: 1614.606
+BIC: 1622.564
+```
+
+The **Simple Exponential Smoothing (SES)** model is suitable for data **without** a clear **trend** or **seasonality**. The model has been optimized and the smoothing level (**alpha**) is 1. This indicates that the model puts full weight on the **most recent observation** and no weight on the older observations. 
+
+## Triple Exponential Smoothing
+
+```markdown
+AIC: 1630.872
+BIC: 1658.742
+```
+
+The **Triple Exponential Smoothing (TES)** model, also known as `Holt-Winters Exponential Smoothing`, takes into account **trend** and **seasonality**. It's more suitable for data with trends and seasonal patterns. The `AIC` and `BIC` are slightly **higher** than `SES`, indicating a slightly **worse fit**.
+
+## ARMA
+
+```markdown
+AIC: 2007.597
+BIC: 2043.153
+```
+
+The **ARMA** model is suitable for stationary time series data. It combines `autoregressive (AR)` and `moving average (MA)` models. The `AIC` and `BIC` are significantly **higher** than the previous models, indicating a **worse fit**.
+
+## ARIMA
+
+```markdown
+AIC: 2007.597
+BIC: 2043.153
+```
+
+The **ARIMA** model extends `ARMA` to **non-stationary time series** data by including differencing. The `AIC` and `BIC` are the **same** as `ARMA` in this case, indicating a **similar fit**.
+
+---
+
+Based on the `AIC` and `BIC`, the **Simple Exponential Smoothing model** has the **best fit**. However, since the data has a **trend** and **seasonality**, the `Triple Exponential Smoothing` model might be more appropriate despite the slightly **higher** `AIC` and `BIC`. For example if we focused on 5 years prediction instead of only 1 year, the `SES` model could perform worse (because of its focus on **last data points**). Similarly, if we want to not convert the data to *stationay*, the `ARIMA` model might be the best choice.
 
 <p align="center">&mdash; ⭐️ &mdash;</p>
 <p align="center"><i>This README was created during the Time Series Analysis course</i></p>
